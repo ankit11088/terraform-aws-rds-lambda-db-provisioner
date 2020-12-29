@@ -324,7 +324,7 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 }
 
 module "aggregated_policy" {
-  source = "git::https://github.com/cloudposse/terraform-aws-iam-policy-document-aggregator.git?ref=tags/0.2.0"
+  source = "git::https://github.com/cloudposse/terraform-aws-iam-policy-document-aggregator.git?ref=tags/0.6.0"
 
   source_documents = compact([
     join("", data.aws_iam_policy_document.default_permissions.*.json),
