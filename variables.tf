@@ -149,3 +149,9 @@ variable "allowed_egress_cidr_blocks" {
 
   default = ["0.0.0.0/0"]
 }
+
+variable "grant_all_privileges" {
+  type        = string
+  default     = "true"
+  description = "Defines whether the user created by lambda function should be given all privileges"
+}

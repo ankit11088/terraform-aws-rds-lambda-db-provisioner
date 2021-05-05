@@ -36,6 +36,7 @@ class DBInfo:
     provision_db_name: str
     provision_user: str
     provision_user_password: str
+    grant_all_privileges: str
 
 
 class DBProvisioner(object):
@@ -210,28 +211,53 @@ class DBProvisioner(object):
             cursor.execute(query)
 
             if info.provision_user:
-                self.logger.info("Granting all privileges on database '{}' to '{}'".format(
-                    info.provision_db_name,
-                    info.provision_user,
-                ))
+                if info.grant_all_privileges == "true":
+                    self.logger.info("Granting all privileges on database '{}' to '{}'".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    ))
 
-                query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'localhost';".format(
-                    info.provision_db_name,
-                    info.provision_user,
-                )
-                cursor.execute(query)
-                query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'%';".format(
-                    info.provision_db_name,
-                    info.provision_user,
-                )
-                cursor.execute(query)
-                query = "FLUSH PRIVILEGES;"
-                cursor.execute(query)
+                    query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'localhost';".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    )
+                    cursor.execute(query)
+                    query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'%';".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    )
+                    cursor.execute(query)
+                    query = "FLUSH PRIVILEGES;"
+                    cursor.execute(query)
 
-                self.logger.info("All privileges on database '{}' granted to '{}'.".format(
-                    info.provision_db_name,
-                    info.provision_user,
-                ))
+                    self.logger.info("All privileges on database '{}' granted to '{}'.".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    ))
+                else:
+                    self.logger.info("Granting read-only privileges on database '{}' to '{}'".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    ))
+
+                    query = "GRANT SELECT PRIVILEGES ON {} . * TO '{}'@'localhost';".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    )
+                    cursor.execute(query)
+                    query = "GRANT SELECT PRIVILEGES ON {} . * TO '{}'@'%';".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    )
+                    cursor.execute(query)
+                    query = "FLUSH PRIVILEGES;"
+                    cursor.execute(query)
+
+                    self.logger.info("Read-only privileges on database '{}' granted to '{}'.".format(
+                        info.provision_db_name,
+                        info.provision_user,
+                    ))
+
 
             self.logger.info("Database '{}' successfully created".format(info.provision_db_name))
 
@@ -257,7 +283,8 @@ class DBProvisioner(object):
             connect_db_name=os.environ.get('CONNECT_DB_NAME', instance.get('DBName')),
             provision_db_name=os.environ.get('PROVISION_DB_NAME'),
             provision_user=os.environ.get('PROVISION_USER'),
-            provision_user_password=user_password
+            provision_user_password=user_password,
+            grant_all_privileges=os.environ.get('GRANT_ALL_PRIVILEGES')
         )
 
         engine: str = instance.get('Engine')
