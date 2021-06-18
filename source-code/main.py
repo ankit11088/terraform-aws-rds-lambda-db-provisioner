@@ -209,57 +209,56 @@ class DBProvisioner(object):
 
             query = "CREATE DATABASE {};".format(info.provision_db_name)
             cursor.execute(query)
-
-            if info.provision_user:
-                if info.grant_all_privileges == "true":
-                    self.logger.info("Granting all privileges on database '{}' to '{}'".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    ))
-
-                    query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'localhost';".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    )
-                    cursor.execute(query)
-                    query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'%';".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    )
-                    cursor.execute(query)
-                    query = "FLUSH PRIVILEGES;"
-                    cursor.execute(query)
-
-                    self.logger.info("All privileges on database '{}' granted to '{}'.".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    ))
-                else:
-                    self.logger.info("Granting read-only privileges on database '{}' to '{}'".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    ))
-
-                    query = "GRANT SELECT PRIVILEGES ON {} . * TO '{}'@'localhost';".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    )
-                    cursor.execute(query)
-                    query = "GRANT SELECT PRIVILEGES ON {} . * TO '{}'@'%';".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    )
-                    cursor.execute(query)
-                    query = "FLUSH PRIVILEGES;"
-                    cursor.execute(query)
-
-                    self.logger.info("Read-only privileges on database '{}' granted to '{}'.".format(
-                        info.provision_db_name,
-                        info.provision_user,
-                    ))
-
-
             self.logger.info("Database '{}' successfully created".format(info.provision_db_name))
+
+        if info.provision_user:
+            if info.grant_all_privileges == "true":
+                self.logger.info("Granting all privileges on database '{}' to '{}'".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                ))
+
+                query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'localhost';".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                )
+                cursor.execute(query)
+                query = "GRANT ALL PRIVILEGES ON {} . * TO '{}'@'%';".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                )
+                cursor.execute(query)
+                query = "FLUSH PRIVILEGES;"
+                cursor.execute(query)
+
+                self.logger.info("All privileges on database '{}' granted to '{}'.".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                ))
+            else:
+                self.logger.info("Granting read-only privileges on database '{}' to '{}'".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                ))
+
+                query = "GRANT SELECT PRIVILEGES ON {} . * TO '{}'@'localhost';".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                )
+                cursor.execute(query)
+                query = "GRANT SELECT PRIVILEGES ON {} . * TO '{}'@'%';".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                )
+                cursor.execute(query)
+                query = "FLUSH PRIVILEGES;"
+                cursor.execute(query)
+
+                self.logger.info("Read-only privileges on database '{}' granted to '{}'.".format(
+                    info.provision_db_name,
+                    info.provision_user,
+                ))
+
 
         cursor.close()
         connection.close()
