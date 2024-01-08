@@ -109,7 +109,7 @@ resource "aws_lambda_function" "default" {
 
   role        = join("", aws_iam_role.lambda.*.arn)
   handler     = "main.lambda_handler"
-  runtime     = "python3.12"
+  runtime     = "python3.10"
   timeout     = var.timeout
   memory_size = var.memory
   kms_key_arn = var.kms_key
