@@ -71,7 +71,7 @@ data "aws_kms_key" "lambda" {
 module "default_label" {
   enabled = var.enabled
 
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.22.1"
+  source     = "git::https://github.com/teamclairvoyant/terraform-null-label.git?ref=fix/lms-24380-Null-label"
   attributes = compact(concat(var.attributes, ["db", "provisioner"]))
   delimiter  = var.delimiter
   name       = var.name
@@ -109,7 +109,7 @@ resource "aws_lambda_function" "default" {
 
   role        = join("", aws_iam_role.lambda.*.arn)
   handler     = "main.lambda_handler"
-  runtime     = "python3.7"
+  runtime     = "python3.12"
   timeout     = var.timeout
   memory_size = var.memory
   kms_key_arn = var.kms_key
@@ -325,7 +325,7 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 }
 
 module "aggregated_policy" {
-  source = "git::https://github.com/cloudposse/terraform-aws-iam-policy-document-aggregator.git?ref=tags/0.7.0"
+  source = "git::https://github.com/teamclairvoyant/terraform-aws-iam-policy-document-aggregator.git?ref=fix/lms-24380-Iam_policy"
 
   source_documents = compact([
     join("", data.aws_iam_policy_document.default_permissions.*.json),
