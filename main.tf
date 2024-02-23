@@ -70,8 +70,8 @@ data "aws_kms_key" "lambda" {
 
 module "default_label" {
   enabled = var.enabled
-
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.22.1"
+  source     = "cloudposse/label/null"
+  version    = "0.25.0"
   attributes = compact(concat(var.attributes, ["db", "provisioner"]))
   delimiter  = var.delimiter
   name       = var.name
@@ -324,20 +324,23 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
   }
 }
 
-module "aggregated_policy" {
-  source = "git::https://github.com/cloudposse/terraform-aws-iam-policy-document-aggregator.git?ref=tags/0.7.0"
+########################################################
+locals  {
 
-  source_documents = compact([
-    join("", data.aws_iam_policy_document.default_permissions.*.json),
-    join("", data.aws_iam_policy_document.lambda_kms_permissions.*.json),
-    join("", data.aws_iam_policy_document.master_password_ssm_permissions.*.json),
-    join("", data.aws_iam_policy_document.master_password_kms_permissions.*.json),
-    join("", data.aws_iam_policy_document.master_password_secretsmanager_permissions.*.json),
-    join("", data.aws_iam_policy_document.user_password_ssm_permissions.*.json),
-    join("", data.aws_iam_policy_document.user_password_kms_permissions.*.json),
-    join("", data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json),
-  ])
+    policy_statement = concat(
+      jsondecode(data.aws_iam_policy_document.default_permissions[0].json).Statement,
+      jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json).Statement,
+      jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json).Statement,
+      jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json).Statement
+      # jsondecode(data.aws_iam_policy_document.assume[0].json).Statement
+      # jsondecode(data.aws_iam_policy_document.lambda_kms_permissions[0].json).Statement
+      # jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json).Statement,
+      # jsondecode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json).Statement,
+      # jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json).Statement
+    )
 }
+
+data "aws_iam_policy_document" "empty" {}
 
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
@@ -355,7 +358,10 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy = module.aggregated_policy.result_document
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = local.policy_statement
+  }) 
 }
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {

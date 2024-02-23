@@ -38,3 +38,11 @@ output "lambda_function_name" {
   value       = join("", aws_lambda_function.default.*.function_name)
 }
 
+output "result_document" {
+  # value       = data.aws_iam_policy_document.default[*].json
+  # description = "Aggregated IAM policy"
+  value = jsonencode({
+    Version   = "2012-10-17",
+    Statement = local.policy_statement
+  })
+}

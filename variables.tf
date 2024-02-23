@@ -155,3 +155,9 @@ variable "grant_all_privileges" {
   default     = "true"
   description = "Defines whether the user created by lambda function should be given all privileges"
 }
+
+variable "source_documents" {
+  type        = list(string)
+  description = "List of JSON IAM policy documents.<br/><br/><b>Limits:</b><br/>* List size max 10<br/> * Statement can be overriden by the statement with the same sid from the latest policy."
+  default     = []
+}
