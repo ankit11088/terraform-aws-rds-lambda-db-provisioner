@@ -339,12 +339,10 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 #   ])
 # }
 
-module "aggregated_policy" {
-  source = "../../"
-
-override_policy_documents = [
-    # data.aws_iam_policy_document.base[count.index].json,
-    # data.aws_iam_policy_document.resource_full_access[count.index].json,
+data "aws_iam_policy_document" "aggregated" {
+  override_policy_documents = [
+    # data.aws_iam_policy_document.base.json,
+    # data.aws_iam_policy_document.resource_full_access.json,
     data.aws_iam_policy_document.default_permissions[count.index].json,
     data.aws_iam_policy_document.lambda_kms_permissions[count.index].json,
     data.aws_iam_policy_document.master_password_ssm_permissions[count.index].json,
@@ -355,6 +353,20 @@ override_policy_documents = [
     data.aws_iam_policy_document.user_password_secretsmanager_permissions[count.index].json
   ]
 }
+# data "aws_iam_policy" "aggregate" {
+# override_policy_documents = [
+#     # data.aws_iam_policy_document.base[count.index].json,
+#     # data.aws_iam_policy_document.resource_full_access[count.index].json,
+#     data.aws_iam_policy_document.default_permissions[count.index].json,
+#     data.aws_iam_policy_document.lambda_kms_permissions[count.index].json,
+#     data.aws_iam_policy_document.master_password_ssm_permissions[count.index].json,
+#     data.aws_iam_policy_document.master_password_kms_permissions[count.index].json,
+#     data.aws_iam_policy_document.master_password_secretsmanager_permissions[count.index].json,
+#     data.aws_iam_policy_document.user_password_ssm_permissions[count.index].json,
+#     data.aws_iam_policy_document.user_password_kms_permissions[count.index].json,
+#     data.aws_iam_policy_document.user_password_secretsmanager_permissions[count.index].json
+#   ]
+# }
 
 # provider "aws" {
 #   region = var.region
