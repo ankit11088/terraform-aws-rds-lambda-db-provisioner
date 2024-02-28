@@ -355,14 +355,14 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 
 data "aws_iam_policy_document" "aggregated" {
   override_policy_documents = [
-    jsonencode(merge(
+    merge(
       data.aws_iam_policy_document.default_permissions[0].json,
       data.aws_iam_policy_document.master_password_ssm_permissions[0].json,
       data.aws_iam_policy_document.master_password_kms_permissions[0].json,
-      data.aws_iam_policy_document.master_password_kms_permissions[0].json,
+      #data.aws_iam_policy_document.master_password_kms_permissions[0].json,
       data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json,
       // Add more data sources if needed
-    ))
+    )
   ]
 }
 
@@ -372,7 +372,7 @@ data "aws_iam_policy_document" "aggregated" {
 #     jsonencode(data.aws_iam_policy_document.lambda_kms_permissions[0].json),
 #     jsonencode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json),
 #     jsonencode(data.aws_iam_policy_document.master_password_kms_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.master_password_kms_permissions[0].json,),
+#     jsonencode(data.aws_iam_policy_document.master_password_kms_permissions[0].json),
 #     jsonencode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json),
 #     jsonencode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json),
 #     jsonencode(data.aws_iam_policy_document.user_password_kms_permissions[0].json),
