@@ -324,21 +324,27 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
   }
 }
 
-module "aggregated_policy" {
-  source = "git::https://github.com/teamclairvoyant/terraform-aws-iam-policy-document-aggregator.git?ref=fix/lms-24380-Iam_policy"
+# module "aggregated_policy" {
+#   source = "git::https://github.com/teamclairvoyant/terraform-aws-iam-policy-document-aggregator.git?ref=fix/lms-24380-Iam_policy"
 
-  source_documents = compact([
-    join("", data.aws_iam_policy_document.default_permissions.*.json),
-    join("", data.aws_iam_policy_document.lambda_kms_permissions.*.json),
-    join("", data.aws_iam_policy_document.master_password_ssm_permissions.*.json),
-    join("", data.aws_iam_policy_document.master_password_kms_permissions.*.json),
-    join("", data.aws_iam_policy_document.master_password_secretsmanager_permissions.*.json),
-    join("", data.aws_iam_policy_document.user_password_ssm_permissions.*.json),
-    join("", data.aws_iam_policy_document.user_password_kms_permissions.*.json),
-    join("", data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json),
-  ])
+#   source_documents = compact([
+#     join("", data.aws_iam_policy_document.default_permissions.*.json),
+#     join("", data.aws_iam_policy_document.lambda_kms_permissions.*.json),
+#     join("", data.aws_iam_policy_document.master_password_ssm_permissions.*.json),
+#     join("", data.aws_iam_policy_document.master_password_kms_permissions.*.json),
+#     join("", data.aws_iam_policy_document.master_password_secretsmanager_permissions.*.json),
+#     join("", data.aws_iam_policy_document.user_password_ssm_permissions.*.json),
+#     join("", data.aws_iam_policy_document.user_password_kms_permissions.*.json),
+#     join("", data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json),
+#   ])
+# }
+
+data "aws_iam_policy_document" "aggregated" {
+  override_policy_documents = [
+    data.aws_iam_policy_document.base.json,
+    data.aws_iam_policy_document.resource_full_access.json
+  ]
 }
-
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
 
@@ -355,7 +361,7 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy = module.aggregated_policy.result_document
+  policy = data.aws_iam_policy_document.aggregated.json #module.aggregated_policy.result_document
 }
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {
