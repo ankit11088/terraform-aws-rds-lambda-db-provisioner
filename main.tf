@@ -338,20 +338,34 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 #     join("", data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json),
 #   ])
 # }
+# data "aws_iam_policy_document" "aggregated" {
+#   override_policy_documents = [
+#     # data.aws_iam_policy_document.base.json,
+#     # data.aws_iam_policy_document.resource_full_access.json,
+#     data.aws_iam_policy_document.default_permissions.*.json,
+#     data.aws_iam_policy_document.lambda_kms_permissions.*.json,
+#     data.aws_iam_policy_document.master_password_ssm_permissions.*.json,
+#     data.aws_iam_policy_document.master_password_kms_permissions.*.json,
+#     data.aws_iam_policy_document.master_password_secretsmanager_permissions.*.json,
+#     data.aws_iam_policy_document.user_password_ssm_permissions.*.json,
+#     data.aws_iam_policy_document.user_password_kms_permissions.*.json,
+#     data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json
+#   ]
+# }
+
 data "aws_iam_policy_document" "aggregated" {
   override_policy_documents = [
-    # data.aws_iam_policy_document.base.json,
-    # data.aws_iam_policy_document.resource_full_access.json,
-    data.aws_iam_policy_document.default_permissions.*.json,
-    data.aws_iam_policy_document.lambda_kms_permissions.*.json,
-    data.aws_iam_policy_document.master_password_ssm_permissions.*.json,
-    data.aws_iam_policy_document.master_password_kms_permissions.*.json,
-    data.aws_iam_policy_document.master_password_secretsmanager_permissions.*.json,
-    data.aws_iam_policy_document.user_password_ssm_permissions.*.json,
-    data.aws_iam_policy_document.user_password_kms_permissions.*.json,
-    data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json
+    data.aws_iam_policy_document.default_permissions.json,
+    data.aws_iam_policy_document.lambda_kms_permissions.json,
+    data.aws_iam_policy_document.master_password_ssm_permissions.json,
+    data.aws_iam_policy_document.master_password_kms_permissions.json,
+    data.aws_iam_policy_document.master_password_secretsmanager_permissions.json,
+    data.aws_iam_policy_document.user_password_ssm_permissions.json,
+    data.aws_iam_policy_document.user_password_kms_permissions.json,
+    data.aws_iam_policy_document.user_password_secretsmanager_permissions.json
   ]
 }
+
 
 # data "aws_iam_policy_document" "aggregated" {
 #   override_policy_documents = [
