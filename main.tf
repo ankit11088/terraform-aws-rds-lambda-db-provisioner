@@ -341,7 +341,8 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 
 module "aggregated_policy" {
   source = "../../"
-  source_documents = [
+
+  source_policy_documents = [
     # data.aws_iam_policy_document.base.json,
     # data.aws_iam_policy_document.resource_full_access.json,
     data.aws_iam_policy_document.default_permissions.json,
