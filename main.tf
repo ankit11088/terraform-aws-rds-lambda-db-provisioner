@@ -334,7 +334,7 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 #     length(data.aws_iam_policy_document.master_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json) : null,
 #     length(data.aws_iam_policy_document.user_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json) : null,
 #     length(data.aws_iam_policy_document.user_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.user_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.user_password_secretsmanager_permissions[*].json) > 0 ? jsondecode( [0].json) : null,
 #     // Add more data sources if needed
 #   ]
 # }
@@ -368,34 +368,54 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 #   )
 # }
 
-locals {
-  source_documents = concat(["null"], var.source_documents)
+# locals {
+#   source_documents = concat(["null"], var.source_documents)
 
-  merged_policy = merge(
-    length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.user_password_secretsmanager_permissions[var.count_index].json,
-    length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions[var.count_index].json,
-    length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions[var.count_index].json,
-    length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions[var.count_index].json,
-    length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions[var.count_index].json,
-    length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions[var.count_index].json
-  )
-}
-
-
-
-variable "source_documents" {
-  type        = list(string)
-  description = "List of JSON IAM policy documents.<br/><br/><b>Limits:</b><br/>* List size max 10<br/> * Statement can be overriden by the statement with the same sid from the latest policy."
-  default     = []
-}
-# output "merged_policy" {
-#   value = local.merged_policy   
+#   merged_policy = merge(
+#     length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.user_password_secretsmanager_permissions[var.count_index].json,
+#     length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions[var.count_index].json,
+#     length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions[var.count_index].json,
+#     length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions[var.count_index].json,
+#     length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions[var.count_index].json,
+#     length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions[var.count_index].json
+#   )
 # }
-variable "count_index" {
-  type        = number
-  description = "The index of the resource being created in a resource count context."
+
+
+# variable "source_documents" {
+#   type        = list(string)
+#   description = "List of JSON IAM policy documents.<br/><br/><b>Limits:</b><br/>* List size max 10<br/> * Statement can be overriden by the statement with the same sid from the latest policy."
+#   default     = []
+# }
+
+# # output "merged_policy" {
+# #   value = local.merged_policy   
+# # }
+# variable "count_index" {
+#   type        = number
+#   description = "The index of the resource being created in a resource count context."
+# }
+
+locals {
+  json_policies = [
+
+          data.aws_iam_policy_document.user_password_secretsmanager_permissions.json,
+          data.aws_iam_policy_document.default_permissions.json,
+          data.aws_iam_policy_document.lambda_kms_permissions.json,
+          data.aws_iam_policy_document.master_password_secretsmanager_permissions.json,
+          data.aws_iam_policy_document.master_password_ssm_permissions.json,
+          data.aws_iam_policy_document.user_password_ssm_permissions.json
+  ]
+  
+  }
+
+locals {
+  merged_json = join(",", [for json in local.json_policies : json])
 }
 
+output "merged_json" {
+  value = local.merged_json
+}
 
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
@@ -413,7 +433,7 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy = local.merged_policy
+  policy = local.merged_json
   } #module.aggregated_policy.result_document
 
 
