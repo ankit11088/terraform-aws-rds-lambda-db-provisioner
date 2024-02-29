@@ -324,153 +324,51 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
   }
 }
 
-# module "aggregated_policy" {
-#   source = "../.."
-
-#   source_documents = compact([
-#     join("", data.aws_iam_policy_document.default_permissions.*.json),
-#     join("", data.aws_iam_policy_document.lambda_kms_permissions.*.json),
-#     join("", data.aws_iam_policy_document.master_password_ssm_permissions.*.json),
-#     join("", data.aws_iam_policy_document.master_password_kms_permissions.*.json),
-#     join("", data.aws_iam_policy_document.master_password_secretsmanager_permissions.*.json),
-#     join("", data.aws_iam_policy_document.user_password_ssm_permissions.*.json),
-#     join("", data.aws_iam_policy_document.user_password_kms_permissions.*.json),
-#     join("", data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json),
-#   ])
-# }
 # data "aws_iam_policy_document" "aggregated" {
 #   override_policy_documents = [
-#     # data.aws_iam_policy_document.base.json,
-#     # data.aws_iam_policy_document.resource_full_access.json,
-#  
-#     
-#     ,
-#   
-#     ,
-#     ,
-#     ,
-#     
+#     // Conditionally include each policy document
+#     length(data.aws_iam_policy_document.default_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.lambda_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.lambda_kms_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.master_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.master_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.master_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.user_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.user_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.user_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json) : null,
+#     // Add more data sources if needed
 #   ]
 # }
 
-data "aws_iam_policy_document" "aggregated" {
-  override_policy_documents = [
-    // Conditionally include each policy document
-    length(data.aws_iam_policy_document.default_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions[0].json) : null,
-    length(data.aws_iam_policy_document.lambda_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.lambda_kms_permissions[0].json) : null,
-    length(data.aws_iam_policy_document.master_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json) : null,
-    length(data.aws_iam_policy_document.master_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json) : null,
-    length(data.aws_iam_policy_document.master_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json) : null,
-    length(data.aws_iam_policy_document.user_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json) : null,
-    length(data.aws_iam_policy_document.user_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json) : null,
-    length(data.aws_iam_policy_document.user_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json) : null,
-    // Add more data sources if needed
-  ]
+# data "aws_iam_policy_document" "aggregated" {
+#   source_policy_documents = [
+#     // Conditionally include each policy document
+#     length(data.aws_iam_policy_document.default_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.lambda_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.lambda_kms_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.master_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.master_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.master_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.user_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.user_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json) : null,
+#     length(data.aws_iam_policy_document.user_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json) : null,
+#     // Add more data sources if needed
+#   ]
+# }
+
+locals {
+  merged_policy = merge(
+
+    data.aws_iam_policy_document.assume,
+    data.aws_iam_policy_document.default_permissions.json,
+    data.aws_iam_policy_document.lambda_kms_permissions.json,
+    data.aws_iam_policy_document.master_password_secretsmanager_permissions.json,
+    data.aws_iam_policy_document.master_password_ssm_permissions.json,
+    data.aws_iam_policy_document.user_password_ssm_permissions.json
+  )
 }
 
-
-
-
-# data "aws_iam_policy_document" "aggregated" {
-#   override_policy_documents = [
-#     merge(
-#       data.aws_iam_policy_document.default_permissions[0].json,
-#       data.aws_iam_policy_document.master_password_ssm_permissions[0].json,
-#       data.aws_iam_policy_document.master_password_kms_permissions[0].json,
-#       data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json,
-#       // Add more data sources if needed
-#     )
-#   ]
-# }
-
-
-# data "aws_iam_policy_document" "aggregated" {
-#   override_policy_documents = [
-#     jsonencode(data.aws_iam_policy_document.default_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.lambda_kms_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.master_password_kms_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.master_password_kms_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.user_password_kms_permissions[0].json),
-#     jsonencode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json),
-#   ]
-# }
-
-
-
-# data "aws_iam_policy_document" "aggregated" {
-#   override_policy_documents = [
-#     # data.aws_iam_policy_document.base.json,
-#     # data.aws_iam_policy_document.resource_full_access.json,
-#     data.aws_iam_policy_document.default_permissions[count.index].json,
-#     data.aws_iam_policy_document.lambda_kms_permissions[count.index].json,
-#     data.aws_iam_policy_document.master_password_ssm_permissions[count.index].json,
-#     data.aws_iam_policy_document.master_password_kms_permissions[count.index].json,
-#     data.aws_iam_policy_document.master_password_secretsmanager_permissions[count.index].json,
-#     data.aws_iam_policy_document.user_password_ssm_permissions[count.index].json,
-#     data.aws_iam_policy_document.user_password_kms_permissions[count.index].json,
-#     data.aws_iam_policy_document.user_password_secretsmanager_permissions[count.index].json
-#   ]
-# }
-# data "aws_iam_policy" "aggregate" {
-# override_policy_documents = [
-#     # data.aws_iam_policy_document.base[count.index].json,
-#     # data.aws_iam_policy_document.resource_full_access[count.index].json,
-#     data.aws_iam_policy_document.default_permissions[count.index].json,
-#     data.aws_iam_policy_document.lambda_kms_permissions[count.index].json,
-#     data.aws_iam_policy_document.master_password_ssm_permissions[count.index].json,
-#     data.aws_iam_policy_document.master_password_kms_permissions[count.index].json,
-#     data.aws_iam_policy_document.master_password_secretsmanager_permissions[count.index].json,
-#     data.aws_iam_policy_document.user_password_ssm_permissions[count.index].json,
-#     data.aws_iam_policy_document.user_password_kms_permissions[count.index].json,
-#     data.aws_iam_policy_document.user_password_secretsmanager_permissions[count.index].json
-#   ]
-# }
-
-# provider "aws" {
-#   region = var.region
-
-#   # Make it faster by skipping the checks
-#   skip_get_ec2_platforms      = true
-#   skip_metadata_api_check     = true
-#   skip_region_validation      = true
-#   skip_credentials_validation = true
-#   skip_requesting_account_id  = true
-# }
-
-# data "aws_iam_policy_document" "resource_full_access" {
-#   statement {
-#     sid       = "FullAccess"
-#     effect    = "Allow"
-#     resources = ["arn:aws:s3:::bucketname/path/*"]
-
-#     actions = [
-#       "s3:PutObject",
-#       "s3:PutObjectAcl",
-#       "s3:GetObject",
-#       "s3:DeleteObject",
-#       "s3:ListBucket",
-#       "s3:ListBucketMultipartUploads",
-#       "s3:GetBucketLocation",
-#       "s3:AbortMultipartUpload"
-#     ]
-#   }
-# }
-
-# data "aws_iam_policy_document" "base" {
-#   statement {
-#     sid       = "BaseAccess"
-#     effect    = "Allow"
-#     resources = ["*"]
-
-#     actions = [
-#       "s3:ListBucket",
-#       "s3:ListBucketVersions"
-#     ]
-#   }
-# }
+output "merged_policy" {
+  value = local.merged_policy   
+}
 
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
@@ -488,8 +386,9 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy = data.aws_iam_policy_document.aggregated.json #module.aggregated_policy.result_document
-}
+  policy = local.merged_policy
+  } #module.aggregated_policy.result_document
+
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {
   count = var.enabled ? 1 : 0
