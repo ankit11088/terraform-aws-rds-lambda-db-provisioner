@@ -355,20 +355,28 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 # }
 
 locals {
+  source_documents = concat(["null"], var.source_documents)
+
   merged_policy = merge(
 
-    data.aws_iam_policy_document.assume[0].json,
-    data.aws_iam_policy_document.default_permissions[0].json,
-    data.aws_iam_policy_document.lambda_kms_permissions[0].json,
-    data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json,
-    data.aws_iam_policy_document.master_password_ssm_permissions[0].json,
-    data.aws_iam_policy_document.user_password_ssm_permissions[0].json
+   length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.assume.json,
+   length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions.json,
+   length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions.json,
+   length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions.json,
+   length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions.json,
+   length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions.json
   )
 }
 
-output "merged_policy" {
-  value = local.merged_policy   
+
+variable "source_documents" {
+  type        = list(string)
+  description = "List of JSON IAM policy documents.<br/><br/><b>Limits:</b><br/>* List size max 10<br/> * Statement can be overriden by the statement with the same sid from the latest policy."
+  default     = []
 }
+# output "merged_policy" {
+#   value = local.merged_policy   
+# }
 
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
