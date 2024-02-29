@@ -359,12 +359,12 @@ locals {
 
   merged_policy = merge(
 
-   length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.assume.json,
-   length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions.json,
-   length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions.json,
-   length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions.json,
-   length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions.json,
-   length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions.json
+   length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.assume[count.index].json,
+   length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions[count.index].json,
+   length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions[count.index].json,
+   length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions[count.index].json,
+   length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions[count.index].json,
+   length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions[count.index].json
   )
 }
 
