@@ -357,12 +357,12 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 locals {
   merged_policy = merge(
 
-    data.aws_iam_policy_document.assume,
-    data.aws_iam_policy_document.default_permissions.json,
-    data.aws_iam_policy_document.lambda_kms_permissions.json,
-    data.aws_iam_policy_document.master_password_secretsmanager_permissions.json,
-    data.aws_iam_policy_document.master_password_ssm_permissions.json,
-    data.aws_iam_policy_document.user_password_ssm_permissions.json
+    data.aws_iam_policy_document.assume[0].json,
+    data.aws_iam_policy_document.default_permissions[0].json,
+    data.aws_iam_policy_document.lambda_kms_permissions[0].json,
+    data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json,
+    data.aws_iam_policy_document.master_password_ssm_permissions[0].json,
+    data.aws_iam_policy_document.user_password_ssm_permissions[0].json
   )
 }
 
