@@ -322,57 +322,22 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
   }
 }
 
-# locals {
-#   # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
-#   source_documents = concat(["null"], var.source_documents)
-
-#   policies = [
-#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
-#       length(local.source_documents) > idx ? element(local.source_documents, idx) : data.aws_iam_policy_document.empty.json
-#   ]
-# }
-
 variable "source_documents" {
-  description = "List of IAM policy documents to be aggregated"
-  type        = list(object({
-    version   = string
-    statement = list(object({
-      effect    = string
-      actions   = list(string)
-      resources = list(string)
-    }))
-  }))
-}
-
-variable "existing_policies" {
-  description = "List of existing IAM policy ARNs"
   type        = list(string)
+  description = "List of JSON IAM policy documents.<br/><br/><b>Limits:</b><br/>* List size max 10<br/> * Statement can be overriden by the statement with the same sid from the latest policy."
+  default     = []
 }
-
 
 ########################################################
-# locals {
-#   # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
-#   source_documents = concat(["null"], var.source_documents)
-
-#   policies = [
-#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
-#       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
-#   ]
-# }
-
 locals {
   # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
   source_documents = concat(["null"], var.source_documents)
 
-  policies_to_add = [
+  policies = [
     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
   ]
-
-  all_policies = compact(concat(var.existing_policies, local.policies_to_add))
 }
-
 
 #####################################
 output "result_document" {
@@ -402,7 +367,7 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy =  data.aws_iam_policy_document.default.json #module.aggregated_policy.result_document
+  policy =  data.aws_iam_policy_document.default[*].json #module.aggregated_policy.result_document
 }
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {
