@@ -240,17 +240,17 @@ data "aws_iam_policy_document" "default_permissions" {
   }
 }
 
-data "aws_iam_policy_document" "lambda_kms_permissions" {
-  count = var.enabled && var.kms_key != null ? 1 : 0
+# data "aws_iam_policy_document" "lambda_kms_permissions" {
+#   count = var.enabled && var.kms_key != null ? 1 : 0
 
-  statement {
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt",
-    ]
-    resources = [join("", data.aws_kms_key.lambda.*.arn)]
-  }
-}
+#   statement {
+#     effect = "Allow"
+#     actions = [
+#       "kms:Decrypt",
+#     ]
+#     resources = [join("", data.aws_kms_key.lambda.*.arn)]
+#   }
+# }
 
 data "aws_iam_policy_document" "master_password_ssm_permissions" {
   count = var.enabled && local.master_password_in_ssm_param ? 1 : 0
@@ -288,29 +288,29 @@ data "aws_iam_policy_document" "master_password_kms_permissions" {
   }
 }
 
-data "aws_iam_policy_document" "user_password_ssm_permissions" {
-  count = var.enabled && local.user_password_in_ssm_param ? 1 : 0
+# data "aws_iam_policy_document" "user_password_ssm_permissions" {
+#   count = var.enabled && local.user_password_in_ssm_param ? 1 : 0
 
-  statement {
-    effect = "Allow"
-    actions = [
-      "ssm:GetParameter",
-    ]
-    resources = ["arn:${data.aws_partition.current.partition}:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.db_user_password_ssm_param}"]
-  }
-}
+#   statement {
+#     effect = "Allow"
+#     actions = [
+#       "ssm:GetParameter",
+#     ]
+#     resources = ["arn:${data.aws_partition.current.partition}:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.db_user_password_ssm_param}"]
+#   }
+# }
 
-data "aws_iam_policy_document" "user_password_secretsmanager_permissions" {
-  count = var.enabled && local.user_password_in_secretsmanager ? 1 : 0
+# data "aws_iam_policy_document" "user_password_secretsmanager_permissions" {
+#   count = var.enabled && local.user_password_in_secretsmanager ? 1 : 0
 
-  statement {
-    effect = "Allow"
-    actions = [
-      "secretsmanager:GetSecretValue",
-    ]
-    resources = [join("", data.aws_secretsmanager_secret.user_password.*.arn)]
-  }
-}
+#   statement {
+#     effect = "Allow"
+#     actions = [
+#       "secretsmanager:GetSecretValue",
+#     ]
+#     resources = [join("", data.aws_secretsmanager_secret.user_password.*.arn)]
+#   }
+# }
 
 data "aws_iam_policy_document" "user_password_kms_permissions" {
   count = var.enabled && local.user_password_in_ssm_param && local.user_password_ssm_param_ecnrypted ? 1 : 0
