@@ -352,7 +352,7 @@ locals {
   ]
 }
 
-data "aws_iam_policy_document" "empty" {}
+# data "aws_iam_policy_document" "empty" {}
 
 data "aws_iam_policy_document" "default" {
   count                   = length(local.policies) > 0 ? 1 : 0
@@ -373,9 +373,9 @@ output "result_document" {
 ###########################################################################
 data "aws_iam_policy_document" "empty" {}
 
-data "aws_iam_policy_document" "default" {
-  source_policy_documents = [join("", local.policies)]
-}
+# data "aws_iam_policy_document" "default" {
+#   source_policy_documents = [join("", local.policies)]
+# }
 
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
