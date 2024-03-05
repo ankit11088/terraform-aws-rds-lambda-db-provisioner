@@ -239,7 +239,7 @@ data "aws_iam_policy_document" "default_permissions" {
     resources = ["*"]
   }
 }
-##################################################
+
 data "aws_iam_policy_document" "lambda_kms_permissions" {
   count = var.enabled && var.kms_key != null ? 1 : 0
 
@@ -251,7 +251,6 @@ data "aws_iam_policy_document" "lambda_kms_permissions" {
     resources = [join("", data.aws_kms_key.lambda.*.arn)]
   }
 }
-##################################################
 data "aws_iam_policy_document" "master_password_ssm_permissions" {
   count = var.enabled && local.master_password_in_ssm_param ? 1 : 0
 
@@ -288,7 +287,6 @@ data "aws_iam_policy_document" "master_password_kms_permissions" {
   }
 }
 
-##################################################
 data "aws_iam_policy_document" "user_password_ssm_permissions" {
   count = var.enabled && local.user_password_in_ssm_param ? 1 : 0
 
@@ -312,7 +310,6 @@ data "aws_iam_policy_document" "user_password_secretsmanager_permissions" {
     resources = [join("", data.aws_secretsmanager_secret.user_password.*.arn)]
   }
 }
-##################################################
 data "aws_iam_policy_document" "user_password_kms_permissions" {
   count = var.enabled && local.user_password_in_ssm_param && local.user_password_ssm_param_ecnrypted ? 1 : 0
 
@@ -336,34 +333,46 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
 # }
 
 variable "source_documents" {
-  type        = list(string)
-  description = "List of JSON IAM policy documents.<br/><br/><b>Limits:</b><br/>* List size max 10<br/> * Statement can be overriden by the statement with the same sid from the latest policy."
-  default     = []
+  description = "List of IAM policy documents to be aggregated"
+  type        = list(object({
+    version   = string
+    statement = list(object({
+      effect    = string
+      actions   = list(string)
+      resources = list(string)
+    }))
+  }))
 }
 
+variable "existing_policies" {
+  description = "List of existing IAM policy ARNs"
+  type        = list(string)
+}
+
+
 ########################################################
+# locals {
+#   # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
+#   source_documents = concat(["null"], var.source_documents)
+
+#   policies = [
+#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
+#       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
+#   ]
+# }
+
 locals {
   # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
   source_documents = concat(["null"], var.source_documents)
 
-  policies = [
+  policies_to_add = [
     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
   ]
+
+  all_policies = compact(concat(var.existing_policies, local.policies_to_add))
 }
 
-# data "aws_iam_policy_document" "empty" {}
-
-# data "aws_iam_policy_document" "default" {
-#   count                   = length(local.policies) > 0 ? 1 : 0
-#   source_policy_documents = local.policies
-# }
-
-# resource "aws_iam_policy" "default" {
-#   count       = length(local.policies) > 0 ? 1 : 0
-#   name        = "resource-dev-default-db-provisioner"
-#   policy      = data.aws_iam_policy_document.default[0].json
-# }
 
 #####################################
 output "result_document" {
