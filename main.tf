@@ -324,63 +324,29 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
   }
 }
 
-# data "aws_iam_policy_document" "aggregated" {
-#   override_policy_documents = [
-#     // Conditionally include each policy document
-#     length(data.aws_iam_policy_document.default_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.lambda_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.lambda_kms_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.master_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.master_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.master_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.user_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.user_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.user_password_secretsmanager_permissions[*].json) > 0 ? jsondecode( [0].json) : null,
-#     // Add more data sources if needed
-#   ]
+# module "aggregated_policy" {
+#   source = "git::https://github.com/teamclairvoyant/terraform-aws-iam-policy-document-aggregator.git?ref=fix/lms-24380-Iam_policy"
+
+#   source_documents = compact([
+#     join("", data.aws_iam_policy_document.default_permissions.*.json),
+#     join("", data.aws_iam_policy_document.lambda_kms_permissions.*.json),
+#     join("", data.aws_iam_policy_document.master_password_ssm_permissions.*.json),
+#     join("", data.aws_iam_policy_document.master_password_kms_permissions.*.json),
+#     join("", data.aws_iam_policy_document.master_password_secretsmanager_permissions.*.json),
+#     join("", data.aws_iam_policy_document.user_password_ssm_permissions.*.json),
+#     join("", data.aws_iam_policy_document.user_password_kms_permissions.*.json),
+#     join("", data.aws_iam_policy_document.user_password_secretsmanager_permissions.*.json),
+#   ])
 # }
 
-# data "aws_iam_policy_document" "aggregated" {
-#   source_policy_documents = [
-#     // Conditionally include each policy document
-#     length(data.aws_iam_policy_document.default_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.lambda_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.lambda_kms_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.master_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.master_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.master_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.user_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.user_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json) : null,
-#     length(data.aws_iam_policy_document.user_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json) : null,
-#     // Add more data sources if needed
-#   ]
-# }
+locals {
+  # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
+  source_documents = concat(["null"], var.source_documents)
 
-# locals {
-#   source_documents = concat(["null"], var.source_documents)
-
-#   merged_policy = merge(
-
-#    length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.assume[count.index].json,
-#    length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions[count.index].json,
-#    length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions[count.index].json,
-#    length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions[count.index].json,
-#    length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions[count.index].json,
-#    length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions[count.index].json
-#   )
-# }
-
-# locals {
-#   source_documents = concat(["null"], var.source_documents)
-
-#   merged_policy = merge(
-#     length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.user_password_secretsmanager_permissions[var.count_index].json,
-#     length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions[var.count_index].json,
-#     length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions[var.count_index].json,
-#     length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions[var.count_index].json,
-#     length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions[var.count_index].json,
-#     length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions[var.count_index].json
-#   )
-# }
-
+  policies = [
+    for idx, doc in slice(local.source_documents, 0, 10) : length(local.source_documents) > idx ? element(local.source_documents, idx) : data.aws_iam_policy_document.empty.json
+  ]
+}
 
 variable "source_documents" {
   type        = list(string)
@@ -388,36 +354,17 @@ variable "source_documents" {
   default     = []
 }
 
-# # output "merged_policy" {
-# #   value = local.merged_policy   
-# # }
-variable "count_index" {
-  type        = number
-  description = "The index of the resource being created in a resource count context."
-  default = 0
+data "aws_iam_policy_document" "empty" {}
+
+data "aws_iam_policy_document" "default" {
+  source_policy_documents = join("", local.policies)
 }
 
-locals {
-  source_documents = concat(["null"], var.source_documents)
-  json_policies = [
-
-    length(local.source_documents) > 1 ? element(local.source_documents, 1) : data.aws_iam_policy_document.user_password_secretsmanager_permissions[var.count_index].json,
-    length(local.source_documents) > 2 ? element(local.source_documents, 2) : data.aws_iam_policy_document.default_permissions[var.count_index].json,
-    length(local.source_documents) > 3 ? element(local.source_documents, 3) : data.aws_iam_policy_document.lambda_kms_permissions[var.count_index].json,
-    length(local.source_documents) > 4 ? element(local.source_documents, 4) : data.aws_iam_policy_document.master_password_secretsmanager_permissions[var.count_index].json,
-    length(local.source_documents) > 5 ? element(local.source_documents, 5) : data.aws_iam_policy_document.master_password_ssm_permissions[var.count_index].json,
-    length(local.source_documents) > 6 ? element(local.source_documents, 6) : data.aws_iam_policy_document.user_password_ssm_permissions[var.count_index].json
-  ]
-  
-  }
-
-locals {
-  merged_json = join(",", [for json in local.json_policies : json])
-}
-
-output "merged_json" {
-  value = local.merged_json
-}
+#####################################
+# output "result_document" {
+#   value       = data.aws_iam_policy_document.default.json
+#   description = "Aggregated IAM policy"
+# }
 
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
@@ -435,9 +382,8 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy = local.merged_json
-  } #module.aggregated_policy.result_document
-
+  policy =  data.aws_iam_policy_document.default.json #module.aggregated_policy.result_document
+}
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {
   count = var.enabled ? 1 : 0
