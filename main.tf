@@ -344,7 +344,8 @@ locals {
   source_documents = concat(["null"], var.source_documents)
 
   policies = [
-    for idx, doc in slice(local.source_documents, 0, 4) : length(local.source_documents) > idx ? element(local.source_documents, idx) : data.aws_iam_policy_document.empty.json
+    for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
+      length(local.source_documents) > idx ? element(local.source_documents, idx) : data.aws_iam_policy_document.empty.json
   ]
 }
 
