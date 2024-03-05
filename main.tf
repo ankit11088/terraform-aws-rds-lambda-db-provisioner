@@ -329,16 +329,22 @@ variable "source_documents" {
 }
 
 ########################################################
+# locals {
+#   source_documents = concat(["override_document"], var.source_documents)
+
+#   policies = [
+#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
+#       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
+#   ]
+# }
 locals {
-  # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
-  source_documents = concat(["null"], var.source_documents)
+  source_documents = concat(["{\"document\": \"override_document\"}"], var.source_documents)
 
   policies = [
     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
   ]
 }
-
 #####################################
 output "result_document" {
   value       = data.aws_iam_policy_document.default[*].json
