@@ -337,13 +337,39 @@ variable "source_documents" {
 #       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
 #   ]
 # }
-locals {
-  source_documents = concat(["{\"document\": \"override_document\"}"], var.source_documents)
+# locals {
+#   source_documents = concat(["{\"document\": \"override_document\"}"], var.source_documents)
 
-  policies = [
-    for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
-      length(local.source_documents) > idx ? element(local.source_documents, idx) : null
-  ]
+#   policies = [
+#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
+#       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
+#   ]
+# }
+
+locals {
+  user_password_kms_permissions = data.aws_iam_policy_document.user_password_kms_permissions.json
+  user_password_secretsmanager_permissions = data.aws_iam_policy_document.user_password_secretsmanager_permissions.json
+  user_password_ssm_permissions = data.aws_iam_policy_document.user_password_ssm_permissions.json
+  assume    = data.aws_iam_policy_document.assume.json
+  default_permissions = data.aws_iam_policy_document.default_permissions.json
+  lambda_kms_permissions = data.aws_iam_policy_document.lambda_kms_permissions.json
+  master_password_ssm_permissions = data.aws_iam_policy_document.master_password_ssm_permissions.json
+  master_password_secretsmanager_permissions = data.aws_iam_policy_document.master_password_secretsmanager_permissions.json
+  master_password_kms_permissions = data.aws_iam_policy_document.master_password_kms_permissions.json      
+
+            
+   combined_policy_document = merge(
+    local.user_password_kms_permissions,
+    local.user_password_secretsmanager_permissions,
+    local.user_password_ssm_permissions,
+    local.assume,
+    local.default_permissions, 
+    local.lambda_kms_permissions,
+    local.master_password_ssm_permissions, 
+    local.master_password_secretsmanager_permissions,
+    local.master_password_kms_permissions
+   )
+
 }
 #####################################
 output "result_document" {
@@ -354,7 +380,7 @@ output "result_document" {
 data "aws_iam_policy_document" "empty" {}
 
 data "aws_iam_policy_document" "default" {
-  source_policy_documents = [join("", local.policies)]
+  source_policy_documents = [join("", local.combined_policy_document)]
 }
 
 resource "aws_iam_role" "lambda" {
