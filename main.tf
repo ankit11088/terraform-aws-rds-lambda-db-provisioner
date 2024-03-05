@@ -357,7 +357,7 @@ variable "source_documents" {
 data "aws_iam_policy_document" "empty" {}
 
 data "aws_iam_policy_document" "default" {
-  source_policy_documents = join("", local.policies)
+  source_policy_documents = [join("", local.policies)]
 }
 
 #####################################
