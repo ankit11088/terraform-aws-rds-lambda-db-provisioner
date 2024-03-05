@@ -367,7 +367,7 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy =  data.aws_iam_policy_document.default[*].json #module.aggregated_policy.result_document
+  policy =  data.aws_iam_policy_document.default.json #module.aggregated_policy.result_document
 }
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {
