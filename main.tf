@@ -325,15 +325,15 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
   }
 }
 
-locals {
-  # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
-  source_documents = concat(["null"], var.source_documents)
+# locals {
+#   # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
+#   source_documents = concat(["null"], var.source_documents)
 
-  policies = [
-    for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
-      length(local.source_documents) > idx ? element(local.source_documents, idx) : data.aws_iam_policy_document.empty.json
-  ]
-}
+#   policies = [
+#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
+#       length(local.source_documents) > idx ? element(local.source_documents, idx) : data.aws_iam_policy_document.empty.json
+#   ]
+# }
 
 variable "source_documents" {
   type        = list(string)
@@ -341,6 +341,36 @@ variable "source_documents" {
   default     = []
 }
 
+########################################################
+locals {
+  # Workaround for this issue https://github.com/hashicorp/terraform/issues/11210
+  source_documents = concat(["null"], var.source_documents)
+
+  policies = [
+    for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
+      length(local.source_documents) > idx ? element(local.source_documents, idx) : null
+  ]
+}
+
+data "aws_iam_policy_document" "empty" {}
+
+data "aws_iam_policy_document" "default" {
+  count                   = length(local.policies) > 0 ? 1 : 0
+  source_policy_documents = local.policies
+}
+
+# resource "aws_iam_policy" "default" {
+#   count       = length(local.policies) > 0 ? 1 : 0
+#   name        = "resource-dev-default-db-provisioner"
+#   policy      = data.aws_iam_policy_document.default[0].json
+# }
+
+#####################################
+output "result_document" {
+  value       = data.aws_iam_policy_document.default[*].json
+  description = "Aggregated IAM policy"
+}
+###########################################################################
 data "aws_iam_policy_document" "empty" {}
 
 data "aws_iam_policy_document" "default" {
