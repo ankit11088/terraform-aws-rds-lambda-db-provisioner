@@ -332,11 +332,11 @@ locals  {
       length(data.aws_iam_policy_document.default_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions[0].json)["Statement"] : [],
 #      length(data.aws_iam_policy_document.default_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions.json)["Statement"] : [],
       # jsondecode(data.aws_iam_policy_document.default_permissions[0].json).Statement,
-      length(data.aws_iam_policy_document.master_password_ssm_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions.json)["Statement"] : [],
+      length(data.aws_iam_policy_document.master_password_ssm_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json)["Statement"] : [],
       # jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json).Statement,
-      length(data.aws_iam_policy_document.master_password_kms_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions.json)["Statement"] : [],
+      length(data.aws_iam_policy_document.master_password_kms_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json)["Statement"] : [],
       # jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json).Statement,
-      length(data.aws_iam_policy_document.master_password_secretsmanager_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions.json)["Statement"] : [],
+      length(data.aws_iam_policy_document.master_password_secretsmanager_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json)["Statement"] : [],
       # jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json).Statement
      # length(data.aws_iam_policy_document.default_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions.json)["Statement"] : [],
       # # jsondecode(data.aws_iam_policy_document.assume[0].json).Statement
