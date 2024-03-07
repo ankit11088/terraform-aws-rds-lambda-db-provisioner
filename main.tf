@@ -329,7 +329,8 @@ locals  {
 
     policy_statement = concat(
       #length(data.aws_iam_policy_document.example1.json) > 0 ? jsondecode(data.aws_iam_policy_document.example1.json)["Statement"] : [],
-      length(data.aws_iam_policy_document.default_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions.json)["Statement"] : [],
+      length(data.aws_iam_policy_document.default_permissions[*].json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions[0].json)["Statement"] : [],
+#      length(data.aws_iam_policy_document.default_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions.json)["Statement"] : [],
       # jsondecode(data.aws_iam_policy_document.default_permissions[0].json).Statement,
       length(data.aws_iam_policy_document.master_password_ssm_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions.json)["Statement"] : [],
       # jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json).Statement,
