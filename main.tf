@@ -109,7 +109,7 @@ resource "aws_lambda_function" "default" {
 
   role        = join("", aws_iam_role.lambda.*.arn)
   handler     = "main.lambda_handler"
-  runtime     = "python3.12"
+  runtime     = "python3.7"
   timeout     = var.timeout
   memory_size = var.memory
   kms_key_arn = var.kms_key
@@ -251,6 +251,7 @@ data "aws_iam_policy_document" "lambda_kms_permissions" {
     resources = [join("", data.aws_kms_key.lambda.*.arn)]
   }
 }
+
 data "aws_iam_policy_document" "master_password_ssm_permissions" {
   count = var.enabled && local.master_password_in_ssm_param ? 1 : 0
 
@@ -310,6 +311,7 @@ data "aws_iam_policy_document" "user_password_secretsmanager_permissions" {
     resources = [join("", data.aws_secretsmanager_secret.user_password.*.arn)]
   }
 }
+
 data "aws_iam_policy_document" "user_password_kms_permissions" {
   count = var.enabled && local.user_password_in_ssm_param && local.user_password_ssm_param_ecnrypted ? 1 : 0
 
@@ -322,66 +324,29 @@ data "aws_iam_policy_document" "user_password_kms_permissions" {
   }
 }
 
-variable "source_documents" {
-  type        = list(string)
-  description = "List of JSON IAM policy documents.<br/><br/><b>Limits:</b><br/>* List size max 10<br/> * Statement can be overriden by the statement with the same sid from the latest policy."
-  default     = []
-}
-
 ########################################################
-# locals {
-#   source_documents = concat(["override_document"], var.source_documents)
+locals  {
 
-#   policies = [
-#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
-#       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
-#   ]
-# }
-# locals {
-#   source_documents = concat(["{\"document\": \"override_document\"}"], var.source_documents)
-
-#   policies = [
-#     for idx, doc in slice(local.source_documents, 0, min(10, length(local.source_documents))) : 
-#       length(local.source_documents) > idx ? element(local.source_documents, idx) : null
-#   ]
-# }
-
-locals {
-  user_password_kms_permissions = data.aws_iam_policy_document.user_password_kms_permissions.json
-  user_password_secretsmanager_permissions = data.aws_iam_policy_document.user_password_secretsmanager_permissions.json
-  user_password_ssm_permissions = data.aws_iam_policy_document.user_password_ssm_permissions.json
-  assume    = data.aws_iam_policy_document.assume.json
-  default_permissions = data.aws_iam_policy_document.default_permissions.json
-  lambda_kms_permissions = data.aws_iam_policy_document.lambda_kms_permissions.json
-  master_password_ssm_permissions = data.aws_iam_policy_document.master_password_ssm_permissions.json
-  master_password_secretsmanager_permissions = data.aws_iam_policy_document.master_password_secretsmanager_permissions.json
-  master_password_kms_permissions = data.aws_iam_policy_document.master_password_kms_permissions.json      
-
-            
-   combined_policy_document = merge(
-    local.user_password_kms_permissions,
-    local.user_password_secretsmanager_permissions,
-    local.user_password_ssm_permissions,
-    local.assume,
-    local.default_permissions, 
-    local.lambda_kms_permissions,
-    local.master_password_ssm_permissions, 
-    local.master_password_secretsmanager_permissions,
-    local.master_password_kms_permissions
-   )
-
+    policy_statement = concat(
+      #length(data.aws_iam_policy_document.example1.json) > 0 ? jsondecode(data.aws_iam_policy_document.example1.json)["Statement"] : [],
+      length(data.aws_iam_policy_document.default_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions.json)["Statement"] : [],
+      # jsondecode(data.aws_iam_policy_document.default_permissions[0].json).Statement,
+      length(data.aws_iam_policy_document.master_password_ssm_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions.json)["Statement"] : [],
+      # jsondecode(data.aws_iam_policy_document.master_password_ssm_permissions[0].json).Statement,
+      length(data.aws_iam_policy_document.master_password_kms_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_kms_permissions.json)["Statement"] : [],
+      # jsondecode(data.aws_iam_policy_document.master_password_kms_permissions[0].json).Statement,
+      length(data.aws_iam_policy_document.master_password_secretsmanager_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions.json)["Statement"] : [],
+      # jsondecode(data.aws_iam_policy_document.master_password_secretsmanager_permissions[0].json).Statement
+     # length(data.aws_iam_policy_document.default_permissions.json) > 0 ? jsondecode(data.aws_iam_policy_document.default_permissions.json)["Statement"] : [],
+      # # jsondecode(data.aws_iam_policy_document.assume[0].json).Statement
+      # # jsondecode(data.aws_iam_policy_document.lambda_kms_permissions[0].json).Statement
+      # # jsondecode(data.aws_iam_policy_document.user_password_ssm_permissions[0].json).Statement,
+      # # jsondecode(data.aws_iam_policy_document.user_password_secretsmanager_permissions[0].json).Statement,
+      # # jsondecode(data.aws_iam_policy_document.user_password_kms_permissions[0].json).Statement
+    )
 }
-#####################################
-output "result_document" {
-  value       = data.aws_iam_policy_document.default[*].json
-  description = "Aggregated IAM policy"
-}
-###########################################################################
+
 data "aws_iam_policy_document" "empty" {}
-
-data "aws_iam_policy_document" "default" {
-  source_policy_documents = [join("", local.combined_policy_document)]
-}
 
 resource "aws_iam_role" "lambda" {
   count = var.enabled ? 1 : 0
@@ -399,7 +364,10 @@ resource "aws_iam_policy" "default" {
   path        = "/"
   description = "IAM policy to control access of Lambda function to AWS resources"
 
-  policy =  data.aws_iam_policy_document.default.json #module.aggregated_policy.result_document
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = local.policy_statement
+  }) 
 }
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {
