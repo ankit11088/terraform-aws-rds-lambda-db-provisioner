@@ -76,7 +76,7 @@ variable "invoke" {
 variable "logs_retention_days" {
   type        = number
   description = "Lambda function logs retentions in days"
-  default     = null
+  default     = 30
 }
 
 variable "logs_kms_key_id" {
